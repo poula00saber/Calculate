@@ -215,7 +215,7 @@ int GetDestinationId(destination& userDestination) {
 	
 
 
-	for (int i = 0; i < 30; i++) {
+	for (int i = 0; i < NumberOfStations; i++) {
 		if (userDestination.station == stations[userDestination.line - 1][i].name) {
 
 			return stations[userDestination.line - 1][i].id;
