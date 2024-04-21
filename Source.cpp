@@ -451,8 +451,7 @@ int main() {
 	int NumberOfStations = CalulateNumberOfStations(userDeparture, userDestination);
 
 		cout << NumberOfStations << endl;
-		cout << userDeparture.id << endl;
-		cout << userDestination.id << endl;
+	
 		
 
 
