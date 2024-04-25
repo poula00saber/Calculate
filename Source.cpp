@@ -2,12 +2,16 @@
 #include <ctime>
 #include<string>
 #include<cstdlib>
+//cls
+#define maxStations 100
 using namespace std;
 const int MaxUsers = 100;
 const int MaxSub = 100;
+int balance = 100;
+int firstLineStations = 35, secondLineStations = 20, thirdLineStations = 29;
+int lineStations[3] = { firstLineStations, secondLineStations, thirdLineStations };
 int numUsers = 2;
 int numSub = 2;
-int balance;
 struct Account {
 	string email;
 	string password;
@@ -21,10 +25,11 @@ struct Subscription {
 	int index;
 };
 struct User {
-	int id;
+	int id=231;
 	Account UserAccount;
-	float Balance;
+	float Balance = 100;
 	Subscription Sub;
+	int rideCounter=20;
 
 };
 Subscription UsersSubscriptionTypes[MaxSub];
@@ -33,8 +38,10 @@ User users[MaxUsers];
 struct MetroStations {
 	int id, line;
 	string name;
+	//arr [3] 4 = 1and2 5 = 2and3 6 =1and3
 };
-MetroStations stations[3][40];
+MetroStations stations[3][maxStations];
+
 struct destination {
 	string station;
 	int id,line ;
@@ -45,9 +52,16 @@ struct departure {
 	int id, line;
 	
 };
+struct ride {
+	string rideID[100000];
+	departure departure;
+	destination destination;
 
+};
 
-void StationsInitialization(MetroStations stations[3][40]) {
+ 
+
+void StationsInitialization(MetroStations stations[3][maxStations]) {
 	// Initialize stations for Line 1
 	MetroStations line1Stations[] = {
 		{1, 1, "El Marg El Gedida"},
@@ -88,7 +102,7 @@ void StationsInitialization(MetroStations stations[3][40]) {
 	};
 
 	// Copy stations for Line 1 to the array of struct
-	for (int i = 0; i < 35; ++i) {
+	for (int i = 0; i < firstLineStations; ++i) {
 		stations[0][i] = line1Stations[i];
 	}
 	
@@ -117,7 +131,7 @@ void StationsInitialization(MetroStations stations[3][40]) {
 	};
 
 	// Copy stations for Line 2 to the array of struct
-	for (int i = 0; i < 20; ++i) {
+	for (int i = 0; i < secondLineStations; ++i) {
 		stations[1][i] = line2Stations[i];
 	}
 
@@ -156,7 +170,7 @@ void StationsInitialization(MetroStations stations[3][40]) {
 		};
 
 		// Copy stations for Line 3 to the array of struct
-		for (int i = 0; i < 29; ++i) {
+		for (int i = 0; i < thirdLineStations; ++i) {
 			stations[2][i] = line3Stations[i];
 		}
 	}
@@ -189,11 +203,11 @@ int GetDepartureId(departure& userDeparture) {
 	
 
 	if (userDeparture.line == 1)
-		NumberOfStations = 35;
+		NumberOfStations = firstLineStations; //35
 	else if (userDeparture.line == 2)
-		NumberOfStations = 20;
+		NumberOfStations = secondLineStations; //20
 	else if (userDeparture.line == 3)
-		NumberOfStations = 29;
+		NumberOfStations = thirdLineStations;//29
 	else return -1;
 
 	for (int i = 0; i < NumberOfStations; i++) {
@@ -223,35 +237,57 @@ int GetDestinationId(destination& userDestination) {
 		}
 	}
 }
-int CalulateNumberOfStations(departure& userDeparture, destination& userDestination) {
+
+void purchaseMetroTicket(User user ,int subscriptionStage) {
+
+	if (subscriptionStage ==1)
+	{
+		user.Balance -= 8;
+	}
+	else if (subscriptionStage == 2)
+	{
+		user.Balance -= 12;
+	}
+	if (subscriptionStage == 3)
+	{
+		user.Balance -= 15;
+	}
+
+
+}
+int CalulateNumberOfStations(departure& userDeparture, destination& userDestination, int subscriptionStage, User user) {	
+
+	//
 	int NumberOfStations;
+	bool stageValidation ;
+
+	
 	if (userDeparture.line == userDestination.line)
-		NumberOfStations = abs(userDestination.id - userDeparture.id) +1;
+		NumberOfStations = abs(userDestination.id - userDeparture.id) + 1;
 	else if (userDeparture.line == 1 && userDestination.line == 2)
-		NumberOfStations = abs(userDeparture.id - 14) + abs(userDestination.id - 8)+1;
+		NumberOfStations = abs(userDeparture.id - 14) + abs(userDestination.id - 8) + 1;
 
 	else if (userDeparture.line == 1 && userDestination.line == 3) {
 		if (userDeparture.id <= 14 && userDestination.id >= 11)
-		NumberOfStations = abs(userDeparture.id - 16) + abs(userDestination.id - 10) - 1;
-	else
-		NumberOfStations = abs(userDeparture.id - 16) + abs(userDestination.id - 10) + 1;
+			NumberOfStations = abs(userDeparture.id - 16) + abs(userDestination.id - 10) - 1;
+		else
+			NumberOfStations = abs(userDeparture.id - 16) + abs(userDestination.id - 10) + 1;
 	}
 	else if (userDeparture.line == 2 && userDestination.line == 1)
-		NumberOfStations = abs(userDeparture.id - 8) + abs(userDestination.id - 14)+1;
+		NumberOfStations = abs(userDeparture.id - 8) + abs(userDestination.id - 14) + 1;
 
 	else if (userDeparture.line == 2 && userDestination.line == 3) {
 		if (userDeparture.id >= 11 && userDestination.id <= 10)
 			NumberOfStations = abs(userDeparture.id - 9) + abs(userDestination.id - 11) - 1;
 
-		else 
+		else
 			NumberOfStations = abs(userDeparture.id - 9) + abs(userDestination.id - 11) + 1;
-
 	}
-	else if (userDeparture.line == 3 && userDestination.line == 1){
-	if (userDeparture.id>= 11 && userDestination.id<= 14)
-	    	NumberOfStations = abs(userDeparture.id - 10) + abs(userDestination.id - 16) - 1;
-	else
-		NumberOfStations = abs(userDeparture.id - 10) + abs(userDestination.id - 16) + 1;
+	else if (userDeparture.line == 3 && userDestination.line == 1) {
+		if (userDeparture.id >= 11 && userDestination.id <= 14)
+			NumberOfStations = abs(userDeparture.id - 10) + abs(userDestination.id - 16) - 1;
+		else
+			NumberOfStations = abs(userDeparture.id - 10) + abs(userDestination.id - 16) + 1;
 	}
 
 	else if (userDeparture.line == 3 && userDestination.line == 2) {
@@ -261,25 +297,105 @@ int CalulateNumberOfStations(departure& userDeparture, destination& userDestinat
 			NumberOfStations = abs(userDeparture.id - 10) + abs(userDestination.id - 16) + 1;
 	}
 
+
+	char option;
+	 subscriptionStage ;
+	switch (subscriptionStage)
+	{
+	case 1:
+		subscriptionStage = 1;
+		if (NumberOfStations > 9 && NumberOfStations <= 16) {
+
+			cout << "Numeber of stations is more than the stage you have chosen(stage 1)\n";
+			cout << "Do you want to purchase from your balance (y)? Or enter the destination again?(n)\n";
+			
+			
+			cin >> option;
+			if (option == 'Y' || option == 'y') {
+				purchaseMetroTicket(user, subscriptionStage);
+
+
+			}
+			else if (option == 'n' || option == 'N') {
+				inputDepartureAndDestination(userDeparture, userDestination);
+				userDeparture.id = GetDepartureId(userDeparture);
+				userDestination.id = GetDestinationId(userDestination);
+				
+				NumberOfStations = 0;
+				 NumberOfStations = CalulateNumberOfStations(userDeparture, userDestination, subscriptionStage, user);
+				 return NumberOfStations;
+			}
+			
+		
+		}
+		break;
+	case 2:
+		subscriptionStage = 2;
+		if (NumberOfStations > 16 && NumberOfStations<=23){
+		
+
+			cout << "Numeber of stations is more than the stage you have chosen(stage 2)\n";
+			cout << "Do you want to purchase from your balance (y)? Or enter the destination again?(n)\n";
+
+		
+			cin >> option;
+			if (option == 'Y' || option == 'y') {
+				purchaseMetroTicket(user, subscriptionStage);
+
+
+			}
+			else if (option == 'n' || option == 'N') {
+				inputDepartureAndDestination(userDeparture, userDestination);
+				userDeparture.id = GetDepartureId(userDeparture);
+				userDestination.id = GetDestinationId(userDestination);
+				subscriptionStage = 1;
+				NumberOfStations = 0;
+				NumberOfStations = CalulateNumberOfStations(userDeparture, userDestination, subscriptionStage, user);
+				return NumberOfStations;
+			}
+
+		
+		}
+		
+		break;
+	case 3:
+		subscriptionStage = 3;
+		if (NumberOfStations > 23)
+		{
+
+			cout << "Numeber of stations is more than the stage you have chosen(stage 3)\n";
+			cout << "Do you want to purchase from your balance (y)? Or enter the destination again?(n)\n";
+
+			//stageValidation = false;
+			cin >> option;
+			if (option == 'Y' || option == 'y') {
+				purchaseMetroTicket(user, subscriptionStage);
+
+
+			}
+			else if (option == 'n' || option == 'N') {
+				inputDepartureAndDestination(userDeparture, userDestination);
+				userDeparture.id = GetDepartureId(userDeparture);
+				userDestination.id = GetDestinationId(userDestination);
+				subscriptionStage = 1;
+				NumberOfStations = 0;
+				NumberOfStations = CalulateNumberOfStations(userDeparture, userDestination, subscriptionStage, user);
+				return NumberOfStations;
+			}
+
+		}
+		break;
+	
+	}
+	user.rideCounter++;
+	string s = to_string( user.id )+ to_string(user.rideCounter);
+	cout << s << endl;
+
+
 	return NumberOfStations;
 
-	// opera to safaa hegazy cus of sadat we didnt make it a atransition station
-	//fair zone to ghamra
-	
 }
-void EditMetroStation(MetroStations stations[3][40] , int numUsers, string destination) {
-	string NewStation;
-	for (int i = 0; i < numUsers; i++) {
-		if ( destination == stations[i][40].name) {
-			cout << "Enter the new station for the metro:" << endl;
-			cin >> NewStation;
-			users[i].UserAccount.email = NewStation;
-			return;
-		}
-	}
-	cout << "User Not Found";
 
-}
 void GetCurrentTime() {
 	cout << __TIME__;
 
@@ -295,7 +411,7 @@ void GetCurrentDate() {
 	cout << __DATE__;
 
 }
-void ViewUsersAccounts(User users[MaxUsers], int numUsers) {
+void ViewUsersAccounts(User users[MaxUsers]) {
 	cout << "Accounts:\n";
 	for (int i = 0; i < numUsers; i++) {
 		cout << "Email: " << users[i].UserAccount.email << "\n";
@@ -325,10 +441,6 @@ void DeleteUsersAccounts(User users[MaxUsers], int& numUsers, int id) {
 
 
 			cout << "User not found!\n";
-
-
-
-
 		}
 	}
 }
@@ -441,18 +553,155 @@ void DeleteSubscriptions(Subscription UsersSubscriptionTypes[], int& numSub, int
 	}
 }
 
+void AddMetroStation(MetroStations stations[3][maxStations]) {
+	int lineNumber, NumberOfStations;
+	char option;
+	do {
+		bool stationAdded = false;
+		cout << "Enter the line you want to add a station to: ";
+		cin >> lineNumber;
+		if (lineNumber >= 1 && lineNumber <= 3) {
+			NumberOfStations = lineStations[lineNumber - 1];
+			if (NumberOfStations < maxStations) {
+				string NewStation;
+				cout << "Enter the name of the new station: ";
+				cin.ignore();
+				getline(cin, NewStation);
+				stations[lineNumber - 1][NumberOfStations].name = NewStation;
+				stations[lineNumber - 1][NumberOfStations].id = NumberOfStations + 1;
+				stations[lineNumber - 1][NumberOfStations].line = lineNumber;
+				NumberOfStations++;
+				lineStations[lineNumber - 1] = NumberOfStations; // Update the global variable
+				stationAdded = true;
+			}
+			else {
+				cout << "Cannot add more stations to this line. Maximum capacity reached.\n";
+			}
+		}
+		else {
+			cout << "Invalid line number!\n";
+		}
+
+		if (stationAdded) {
+			cout << "Station added successfully!\n";
+		}
+		else {
+			cout << "Error adding station!\n";
+		}
+
+		cout << "Do you want to add another station? (y/n): ";
+		cin >> option;
+	} while (option == 'y' || option == 'Y');
+}
+void ViewMetroStations(MetroStations stations[3][maxStations]) {
+	int lineNumber, NumberOfStations;
+	char option;
+	do {
+		cout << "Enter the line you want to view \n";
+		cin >> lineNumber;
+
+		if (lineNumber >= 1 && lineNumber <= 3) {
+			NumberOfStations = lineStations[lineNumber - 1];
+
+			cout << "Stations:\n";
+			for (int i = 0; i < NumberOfStations; i++) {
+				cout << i + 1 << "->" << stations[lineNumber - 1][i].name << "\n";
+			}
+		}
+		cout << "Do you want to view another line ? (y/n) \n";
+		cin >> option;
+	} while (option == 'y' || option == 'Y');
+	
+}
+void EditMetroStation(MetroStations stations[3][maxStations]) {
+	
+	int lineNumber, NumberOfStations, id;
+	string NewStation;
+	cout << "Enter the line you want to edit from: \n";
+	cin >> lineNumber;
+	cout << "Enter the number of the station you want to edit: ";
+	cin >> id;
+	
+	if (lineNumber >= 1 && lineNumber <= 3) {
+		NumberOfStations = lineStations[lineNumber - 1];
+		bool stationFound = false;
+		for (int i = 0; i < NumberOfStations; i++) {
+			if (id == stations[lineNumber-1][i].id) {
+				cout << "Enter the new station for the metro:" << endl;
+				cin.ignore();
+				getline(cin, NewStation);
+				stations[lineNumber-1][i].name = NewStation;
+				return;
+			}
+		}
+		if (!stationFound) 
+			cout << "Station not found!\n";
+	}
+	else {
+		cout << "Invalid line number!\n";
+	}
+
+}
+void DeleteMetroStation(MetroStations stations[3][maxStations]) {
+	int lineNumber, NumberOfStations, id;
+	cout << "Enter the line you want to delete from: \n";
+	cin >> lineNumber;
+	cout << "Enter the number of the station you want to delete: ";
+	cin >> id;
+	if (lineNumber >= 1 && lineNumber <= 3) {
+		NumberOfStations = lineStations[lineNumber - 1];
+		bool stationFound = false;
+		for (int i = 0; i < NumberOfStations; i++) {
+			if (id == stations[lineNumber - 1][i].id) {
+				// Shift stations after the deleted station one index to the left
+				for (int j = i; j < NumberOfStations - 1; j++) {
+					stations[lineNumber - 1][j] = stations[lineNumber - 1][j + 1];
+				}
+				NumberOfStations--; // Decrement the count of stations
+				cout << "Metro station deleted successfully!\n";
+				lineStations[lineNumber - 1] = NumberOfStations; // Update the global variable
+				stationFound = true;
+				break;
+			}
+		}
+		if (stationFound) {
+			// Update the global variable for the number of stations
+			if (lineNumber == 1)
+				firstLineStations = NumberOfStations;
+			else if (lineNumber == 2)
+				secondLineStations = NumberOfStations;
+			else if (lineNumber == 3)
+				thirdLineStations = NumberOfStations;
+		}
+		else {
+			cout << "Station not found!\n";
+		}
+	}
+	else {
+		cout << "Invalid line number!\n";
+	}
+}
+
 int main() {
+	User user;
 	departure userDeparture;
 	destination userDestination;
+	
 	StationsInitialization(stations);
+	//ViewMetroStations(stations);
+	//DeleteMetroStation(stations);
+	//EditMetroStation(stations);
+	//AddMetroStation(stations);
+	//ViewMetroStations(stations);
+	
 	inputDepartureAndDestination(userDeparture, userDestination);
 	userDeparture.id = GetDepartureId(userDeparture);
 	userDestination.id = GetDestinationId(userDestination);
-	int NumberOfStations = CalulateNumberOfStations(userDeparture, userDestination);
-
-		cout << NumberOfStations << endl;
+	int subscriptionStage = 1;
+	int NumberOfStations = CalulateNumberOfStations(userDeparture, userDestination , subscriptionStage, user );
 	
-		
+		cout << NumberOfStations <<" Stations" << endl;
+
 
 
 
